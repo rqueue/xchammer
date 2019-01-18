@@ -4,17 +4,23 @@ if [[ $(basename $EXPORT_DIR) != "tulsi-aspects" ]]; then
 	echo "Path must end in tulsi-aspects"
 	exit 0
 fi
-echo "Working around Swift Package managers ability to handle Tulsi..."
 
-ROOT_DIR=$PWD
-TULSI=$(ls -t -d $PWD/.build/checkouts/Tulsi.git-* | head -n1)
+# Fetch xchammer
+tools/bazelwrapper fetch xchammer
 
-cd $TULSI
-echo "Building Tulsi resources"
-xcodebuild build -quiet -scheme TulsiApp -derivedDataPath $PWD/tulsi_build -project src/Tulsi.xcodeproj/ -configuration Release
+TULSI_DIR="$(tools/bazelwrapper info output_base)/external/xchammer-Tulsi"
 
-echo "Exporting resources to $1"
-# Export resources
 rm -rf $EXPORT_DIR
+mkdir $EXPORT_DIR
 
-cp -r tulsi_build/Build/Products/Release/TulsiGenerator.framework/Resources/ $EXPORT_DIR
+mkdir $EXPORT_DIR/tulsi/
+ditto $TULSI_DIR/src/TulsiGenerator/Bazel/* $EXPORT_DIR/tulsi/
+
+# Need to move the workspace file
+mv $EXPORT_DIR/tulsi/WORKSPACE $EXPORT_DIR
+
+ditto $TULSI_DIR/src/TulsiGenerator/Scripts/* $EXPORT_DIR
+
+# Cleanup unused test files
+for f in $(find $EXPORT_DIR -name *tests\.py);  do rm -rf $f; done
+
