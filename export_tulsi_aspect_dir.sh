@@ -20,6 +20,7 @@ ditto $TULSI_DIR/src/TulsiGenerator/Bazel/* $EXPORT_DIR/tulsi/
 mv $EXPORT_DIR/tulsi/WORKSPACE $EXPORT_DIR
 
 ditto $TULSI_DIR/src/TulsiGenerator/Scripts/* $EXPORT_DIR
+rm -rf $EXPORT_DIR/BUILD
 
 # Cleanup unused test files
 for f in $(find $EXPORT_DIR -name *tests\.py);  do rm -rf $f; done
